@@ -2,26 +2,35 @@
 
 import sys
 
-# get input word
-num = int(input())
+# 단어의 개수 입력받기
+n = int(input())
 
-li = []
-for _ in range(num):
-  li.append(sys.stdin.readline().strip())
+# n개의 단어 입력
+word_li = []
+for _ in range(n):
+    word_li.append(sys.stdin.readline().strip())
 
-count = 0
+# make def. to check this word is group word
+def check_groupWord(word):
+    check_set = set()
+    alphabet = word[0]
+    check_set.add(alphabet)
 
-alphabet_li = [0] * 26
+    for a in word:
+        if a == alphabet:
+            continue
+        else:
+            if a in check_set:
+                return 0
+            else:
+                alphabet = a
+                check_set.add(a)
 
-for i in li:
-  for j in range(len(i)):
-    if j != (len(i)-1) and (i[j] == i[j+1]):
-      continue
-    else:
-      alphabet_li[ord(i[j]) - 97] += 1
+    return 1
 
-  if max(alphabet_li) < 2:
-    count += 1
-  alphabet_li = [0] * 26
+# Let's check using word_list!
+output = 0
+for word in word_li:
+    output += check_groupWord(word)
 
-print(count)
+print(output)
