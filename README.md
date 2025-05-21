@@ -3,4 +3,4 @@ This repository is my study log for algorithms.
 
 ----------
 And it is my study process.
-1. solve basic problem in baekjoon (file: basic_baekkjoon)
+1. solve basic 100 problem in baekjoon (file: basic_baekkJoon)
