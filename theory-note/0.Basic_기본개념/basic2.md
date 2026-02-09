@@ -146,6 +146,136 @@ bool cmp2(vector<int>& v1, vector<int>& v2, int idx) {
 cmp2 함수에서는 v1, v2의 type을 vector의 reference로 만들엇다. 그러면 cmp2가 호출될 때 복사본을 따로 만들지 않고 참조 대상의 주소 정보만 넘어가므로 시간복잡도는 O(1)이 된다.
 
 # 2. 표준 입출력
+* C: scanf/printf
+    * C++ string을 처리할 수 없음 : C에서는 문자열을 char*로 다루는데 이보다 C++ string이 월등히 편하다. 따라서 만약 scanf/printf를 쓰면서 C++ string도 사용하고 싶다면 일단 char * 로 입력을 받고 string으로 형 변환을 해서 원하는 작업을 다 끝낸 후에 c_str() 메소드를 이용해 출력하면 된다.
+* C++: cin/cout
+```C++
+int main(void){
+    string s = "IWantGoHome..";
+    printf("s is %s\n", s);
+}
+/***result***
+s is ?
+*************/
+```
+```C
+int main(void) {
+    char a[10];
+    printf("input: ");
+    scanf("%s", a);
+    string s(a);  // 혹은 string s = a;
+    printf("a is %s\n", a);
+    printf("a is %s\n", s.c_str());
+}
 
+/*** reslt***
+input : test
+a is test
+a is test
+*************/
+```
+---
+scanf, cin을 쓸 때 주의할 점: 모두 공백을 포함한 문자열을 입력할 떄, 공백 앞까지만 입력을 받는다.
+* 해결책1. scanf 옵션 사용: scanf에서 줄바꿈(\n)이 나오기 전까지 입력을 받는다는 걸 명시
+    ```C
+    char al[10];
+    scanf("%[^\n]", al);
+    ```
+* 해결책2. gets 함수(보안상의 이유로 C++14 이상에서는 제거됨)
+    ```C
+    char a2[10];
+    gets(a2);
+    puts(a2);
+    ```
+* 해결책3. getline 함수: 가장 깔끔. 대신 type이 C++ string이어야 함
+    ```C
+    string s;
+    getline(cin, s);
+    cout << s;
+    ```
+> 공백이 포함된 문자열을 받아야 할 떄 단순히 scanf나 cin을 쓰면 안된다!
+___
+cin/cout에서 주의할 점: scanf/printf와 다르게 cin/cout은 입출력으로 인한 시간초과를 막기 위해서 `ios::sync_with_stdio(0)`, `cin.tie(0)`이라는 두 명령을 실행 시켜야 한다. 이를 해두지 않으면 입/출력 양이 많을 때 시간초과가 날 수 있다.
+* `ios::sync_with_stdio(0)`
+    * 기본적으로 scanf/printf 등에서 쓰는 C stream과 cin/cout 등에서 쓰는 C++ stream은 분리되어 있다. 따라서 printf와 cout을 번갈아 사용하는 상황을 고려하여 코드의 흐름과 실제 출력이 동일하기 위해 프로그램에서는 C++ stream과 C stream을 동기화하고 있다.
+    * 그런데 이 동기화 작업에도 시간이 소요되므로, 만일 C++ stream만 사용한다면 굳이 두 stream을 동기화할 필요가 없다.
+    * 따라서 C++ stream만 쓸 떄 동기화를 끊어버려서 프로그램 수행 시간에서 이득을 챙길 수 있는 명령이 `sync_with_stdio(0)`(=`sync_with_stdio(false)`)이다.
+    * 대신 동기화를 끊었으면 절대 cout과 printf를 섞어쓰면 안된다. 섞어쓰면 출력 결과가 꼬인다.
+* `cin.tie(0)`
+    * 버퍼(Buffer)
+        * 정의: 버퍼는 데이터를 한 곳에서 다른 곳으로 전송하는 동안 일시적으로 그 데이터를 보관하는 메모리 영역이다.
+        * 작동 방식: 프로그램이 데이터를 즉시 출력 장치로 보내지 않고 버퍼에 모아두었다가, 버퍼가 가득 차거나 특정 조건(Flush)이 만족되면 한꺼번에 전송한다. 이는 시스템 콜 횟수를 줄여 성능을 향상시킨다.
+    * cin.tie(0)의 역할
+        * cin과 cout은 기본적으로 묶여(Tied) 있다. 즉, 입력 요청이 들어오면 출력 버퍼를 강제로 비워(Flush) 화면에 내용을 먼저 표시하도록 설계되어 있다.
+        * 기본 동작: `cout << "Enter name: "; cin >> name;`상황에서 사용자가 이름을 입력하기 전, "Enter name: "이 화면에 반드시 보여야 하므로 cin은 호출될 때마다 cout의 버퍼를 비운다.
+        * 문제점: 알고리즘 풀이처럼 방대한 양의 입력과 출력이 반복되는 경우, 매번 버퍼를 비우는 작업은 상당한 시간 지연을 초래한다.
+        * 해결책: `cin.tie(NULL)` 또는 `cin.tie(0)` 을 사용하면 cin과 cout의 연결을 끊어 버퍼를 자동으로 비우지 않게 한다.
+```C++
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    // 입출력 최적화
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, m;
+    // 반복적인 입출력이 발생할 때 tie를 해제하면 속도가 비약적으로 상승
+    while (cin >> n >> m) {
+        cout << n + m << "\n"; // endl 대신 "\n" 사용 권장
+    }
+
+    return 0;
+}
+```
+___
+*endl은 절대 쓰면 안된다..!*
+
+endl은 개행문자("\n")을 출력하고 출력 버퍼를 비우라는 명령이다. 
+
+알고리즘 문제를 풀경우, 어차피 저지는 프로그램이 종료될 때 출력이 어떻게 생겼는지를 가지고 채점을 진행하니까 중간 버퍼를 비우라고 명령을 줄 필요가 없다.
+
+> 순수하게 개행 문자(\n)만 사용하자..!
+---
 
 # 3. 코드 작성 팁
+## (1) 코딩 테스트와 개발은 다르다. 
+* 깔끔한 코드
+    ```C++
+    #include <iostream>
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    int n, x;
+    std::cin >> n >> x;
+    int* a= new int[n];
+    for(int i = 0; i < n; i++)
+        std::cin >> a[i];
+    for(int i = 0; i < n; i++)
+        if(a[i] < x) std::cout << a[i] << ' ';
+    delete[] a;
+    ```
+* 코딩테스트용 코드
+    ```C++
+    #include <bits/stdc++.h>
+
+    using namespace std;
+
+    int main(){
+        ios::sync_with_stdio(0);
+        cin.tie(0);
+
+        int n, x, t;
+        cin >> n >> x;
+        while(n--){
+            cin >> t;
+            if(t < x) cout << t << ' ';
+        }
+    }
+    ```
+
+## (2) 출력 맨 마지막 공백 혹은 줄바굼이 추가로 있어도 상관없다.
+공백과 줄바꿈이 출력 맨 마지막에 추가로 있어도 정답 처리되므로, 별도로 예외처리할 필요가 없다.
+
+## (3) 디버거는 굳이 사용하지 않아도 된다.
+만일 중간 변수를 보고 싶으면 cout이나 printf로 출력을 찍어서 확인하고 디버거는 굳이 사용하지 않는 것을 권장한다.
