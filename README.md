@@ -13,6 +13,8 @@ ___
 
 마음에 새기고 있는 문장입니다. 많이 틀리고, 많이 실수하겠지만 그렇게 전문가가 되어가리라고 믿습니다. 그럼 알고리즘을 공부하는 모두들 화이팅! 
 
+## 현재 상태
+[![Solved.ac Profile](http://mazassumnida.wtf/api/v2/generate_badge?boj=andante_kim)](https://solved.ac/andante_kim/)
 
 
 ## 공부 자료
